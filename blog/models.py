@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Blog(models.Model):
     title = models.CharField(max_length=200)
@@ -10,3 +11,8 @@ class Blog(models.Model):
     
     def summary(self):
         return self.body[:100]
+
+class Comment(models.Model):
+    post = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    body = models.CharField(max_length=500) # 댓글내용

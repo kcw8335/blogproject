@@ -14,12 +14,16 @@ urlpatterns = [
     path('blog/create',blog.views.create, name="create"),
     path('blog/edit/<int:blog_id>', blog.views.edit, name="edit"),
     path('blog/delete/<int:blog_id>', blog.views.delete, name="delete"),
+    path('blog/comment_add/<int:blog_id>', blog.views.comment_add, name="comment_add"),
+    path('blog/comment_edit/<int:comment_id>', blog.views.comment_edit, name="comment_edit"),
 
     path('portfolio/',portfolio.views.portfolio, name="portfolio"),
 
     path('accounts/signup/', accounts.views.signup, name="signup"),
     path('accounts/login/', accounts.views.login, name="login"),
     path('accounts/logout/', accounts.views.logout, name="logout"),
+
+    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
