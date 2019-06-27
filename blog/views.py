@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from .models import Blog, Comment
 from django.contrib.auth.decorators import login_required
+from .forms import BlogForm
 
 def home(request):
     blogs = Blog.objects
@@ -17,25 +18,31 @@ def detail(request, blog_id):
     return render(request, 'detail.html',{'details':details})
 
 def new(request):
-    return render(request, 'new.html')
+    form = BlogForm()
+    return render(request, 'new.html',{'form':form})
 
 def create(request):
-    blog = Blog()
-    blog.title = request.GET['title']
-    blog.body = request.GET['body']
-    blog.pub_date = timezone.datetime.now()
-    blog.save()
-    return redirect('/blog/' + str(blog.id))
+    if request.method == "POST":
+        form = BlogForm(request.POST)
+        if form.is_valid():
+            blog = form.save(commit=False)
+            blog.save()
+            return redirect('/blog/' + str(blog.id))
+    else:
+        form = BlogForm()
+    return render(request, 'new.html', {'form':form})
 
 def edit(request, blog_id):
     blog = get_object_or_404(Blog, pk=blog_id)
     if request.method == "POST":
-        blog.title = request.POST['title']
-        blog.body = request.POST['body']
-        blog.pub_date = timezone.datetime.now()
-        blog.save()
-        return redirect('/blog/' + str(blog.id))
-    return render(request, 'edit.html',{'blog':blog})
+        form = BlogForm(request.POST, instance=blog)
+        if form.is_valid():
+            blog = form.save(commit = False)
+            blog.save()
+            return redirect('/blog/' + str(blog.id))
+    else:
+        form = BlogForm(instance=blog)
+    return render(request, 'edit.html', {'form':form})
 
 def delete(request, blog_id):
     blog = get_object_or_404(Blog, pk=blog_id)
@@ -67,3 +74,13 @@ def comment_edit(request, comment_id):
             'comment' : comment
         }
         return render(request, 'comment_edit.html', context)
+
+@login_required
+def comment_delete(request, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user == comment.user:
+        if request.method == "POST":
+            post_id = comment.post.id
+            comment.delete()
+            return redirect('/blog/'+ str(post_id))
+    return HttpResponse('잘못된 접근입니다.')

@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block body %}
 <br>
 <div class="container">
@@ -25,10 +24,20 @@
 
 {% for comment in details.comments.all %}
   {{comment.user.username}} : {{comment.body}}
+  {% if comment.user == request.user %}
   <a href="{% url 'comment_edit' comment.id %}">편집</a>
-  
+  <a href="javascript:{
+    var form = document.getElementById('delete');
+    form.action = '/blog/comment_delete/{{comment.id}}';
+    form.submit();}">삭제</a>
+  {% endif %}
   <br>
 {% endfor %}
-</div>
 
+<form id="delete" method="POST" action="">
+  {% csrf_token %} <input type ="hidden">
+</form>
+
+
+</div>
 {% endblock %}
